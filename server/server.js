@@ -165,8 +165,8 @@ export function createServer(opts = {}) {
   const tlsCert = opts.tlsCert ?? process.env.TLS_CERT;
   const tlsKey = opts.tlsKey ?? process.env.TLS_KEY;
   const tls = !!(tlsCert && tlsKey);
-  const trustProxy = opts.trustProxy ?? process.env.TRUST_PROXY === '1';
-  const hsts = tls || (opts.hsts ?? process.env.HSTS === '1');
+  const trustProxy = opts.trustProxy ?? (process.env.TRUST_PROXY === '1' || !!process.env.RENDER);
+  const hsts = tls || (opts.hsts ?? (process.env.HSTS === '1' || !!process.env.RENDER));
   const allowed = (opts.allowedOrigins ?? process.env.ALLOWED_ORIGINS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
   const store = new Store(opts.dataDir === undefined ? (process.env.DATA_DIR || path.join(HERE, '..', 'data')) : opts.dataDir);
 
@@ -442,7 +442,8 @@ export function createServer(opts = {}) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 8080);
-  const host = process.env.HOST || '127.0.0.1';
+  // Render.com (и похожие PaaS) задают RENDER/PORT и требуют слушать все интерфейсы.
+  const host = process.env.HOST || (process.env.RENDER ? '0.0.0.0' : '127.0.0.1');
   const app = createServer();
   app.listen(port, host).then(() => {
     const proto = process.env.TLS_CERT ? 'https' : 'http';
