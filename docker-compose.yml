@@ -1,0 +1,25 @@
+# Запуск: впишите свой домен в Caddyfile, затем `docker compose up -d`.
+# Caddy сам получит TLS-сертификат Let's Encrypt.
+services:
+  max:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - max-data:/data
+    logging:
+      driver: none            # сервер ничего не пишет, но и Docker не должен ничего хранить
+  caddy:
+    image: caddy:2.10
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    logging:
+      driver: none
+volumes:
+  max-data:
+  caddy-data:

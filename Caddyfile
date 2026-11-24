@@ -1,0 +1,7 @@
+# Замените max.example.org на свой домен.
+max.example.org {
+	reverse_proxy max:8080
+	log {
+		output discard
+	}
+}
